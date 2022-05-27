@@ -31,7 +31,7 @@ def load_data():
     # Load the data from the Scripps CO2 program website.
     co2_df = pd.read_csv(
         # Source: https://scrippsco2.ucsd.edu/assets/data/atmospheric/stations/in_situ_co2/monthly/monthly_in_situ_co2_mlo.csv
-        './monthly_in_situ_co2_mlo.csv',
+        'monthly_in_situ_co2_mlo.csv',
         header=3,  # Data starts here
         skiprows=[4, 5],  # Headers consist of multiple rows
         usecols=[3, 4],  # Only keep the 'Date' and 'CO2' columns

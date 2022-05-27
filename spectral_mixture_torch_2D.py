@@ -1,13 +1,18 @@
 import math
 
+import os
+
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import numpy as np
 import torch
 import gpytorch
 from matplotlib import pyplot as plt
 
+
 train_x = np.array([[2.42192029845479, -3.40625498677908], [4.15400042880726, -2.69654093304395],
                       [2.32815799195191, -2.00416583442628], [1.13983846996822, -5],
                       [-1.80785467832001, -3.20785404046540], [2.44673584474322, 3.36911835780936]])
+
 train_y = np.array([221.055625327954,
                       223.194970815307,
                       224.376806565064,
@@ -27,6 +32,11 @@ test_x = np.array([[-5.0000, -4.7074],
           [5.0000, -3.1685],
           [3.2366, -1.7481],
           [1.3077, 0.9684]])
+
+train_x = np.genfromtxt('./data/xtr.csv', delimiter=',')
+train_y = np.genfromtxt('./data/ytr.csv', delimiter=',')
+test_x = np.genfromtxt('./data/xte.csv', delimiter=',')
+test_y = np.genfromtxt('./data/yte.csv', delimiter=',')
 
 train_x = torch.from_numpy(train_x)
 train_y = torch.from_numpy(train_y)
@@ -48,7 +58,7 @@ class SpectralMixtureGPModel(gpytorch.models.ExactGP):
 likelihood = gpytorch.likelihoods.GaussianLikelihood()
 model = SpectralMixtureGPModel(train_x, train_y, likelihood)
 
-training_iter = 1500
+training_iter = 200
 
 # Find optimal model hyperparameters
 model.train()
@@ -78,6 +88,11 @@ likelihood.eval()
 # The gpytorch.settings.fast_pred_var flag activates LOVE (for fast variances)
 # See https://arxiv.org/abs/1803.06058
 with torch.no_grad(), gpytorch.settings.fast_pred_var():
+    f_preds = model(test_x)
+    f_mean = f_preds.mean
+    # f_cov = f_preds.covariance_matrix
+
+    print("RMSE:", torch.sqrt(torch.sum((f_mean - test_y)**2)))
     # Make predictions
     observed_pred = likelihood(model(test_x))
 
